@@ -125,7 +125,7 @@ public class JShot {
 			boolean left = (origin & TOP_LEFT) > 0 || (origin & BOTTOM_LEFT) > 0;  
 			
 			/*
-			 * distinguish betwen top and bottom
+			 * distinguish between top and bottom
 			 * left- and right border are calculated the same for top or bottom
 			 */
 			
@@ -133,30 +133,36 @@ public class JShot {
 			int x2;
 			int y1;
 			int y2;
+			int borderX;
+			int borderY;
 			
 			if (top) {
 				y1 = startY;
 				y2 = endY;
+				borderY = borderWidth;
 			} else { // bottom
 				y1 = endY;
 				y2 = startY;
+				borderY = -borderWidth;
 			}
 			
 			if (left) {
 				x1 = startX;
 				x2 = endX;
+				borderX = borderWidth;
 			} else { // right
 				x1 = endX;
 				x2 = startX;
+				borderX = -borderWidth;
 			}
 			
-			int width = x2 - x1;
-			int height = y2 - y1;
+			int width = x2 - x1 + borderWidth;
+			int height = y2 - y1 + borderWidth;
 				
-			topBorder = new Rectangle(x1 - borderWidth, y1 - borderWidth, width, borderWidth);
-			rightBorder = new Rectangle(x2 - borderWidth, y1 - borderWidth, borderWidth, height);
-			bottomBorder = new Rectangle(x1, y2-borderWidth, width, borderWidth);
-			leftBorder = new Rectangle(x1 - borderWidth, y1, borderWidth, height);
+			topBorder = new Rectangle(x1 - borderX, y1 - borderY, width, borderWidth);
+			rightBorder = new Rectangle(x2 - borderX, y1 - borderY, borderWidth, height);
+			bottomBorder = new Rectangle(x1 - borderX, y2 - borderY, width, borderWidth);
+			leftBorder = new Rectangle(x1 - borderX, y1 - borderY, borderWidth, height);
 
 			// create new region
 			try {
