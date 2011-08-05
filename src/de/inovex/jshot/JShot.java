@@ -79,9 +79,15 @@ public class JShot {
 		private int width;
 		private int height;
 
+		public void clear() {
+			if (region != null) {
+				region.dispose();
+			}
+			shell.setRegion(new Region());
+		}
+		
 		public Frame(Shell parent) {
 			this(parent, 5, new Color(parent.getDisplay(), 255, 0, 0));
-			
 		}
 		
 		public Frame(Shell parent, int borderWidth, Color borderColor) {
@@ -91,7 +97,7 @@ public class JShot {
 			this.borderWidth = borderWidth;
 			shell.setBackground(borderColor);
 			shell.setSize(parent.getDisplay().getBounds().width, parent.getDisplay().getBounds().height);
-			shell.setRegion(new Region());
+			this.clear();
 			shell.setVisible(true);
 		}
 		
@@ -106,61 +112,53 @@ public class JShot {
 			if (region != null) {
 				region.dispose();
 			}
-
 			
 			Rectangle topBorder = null;
 			Rectangle rightBorder = null;
 			Rectangle bottomBorder = null;
 			Rectangle leftBorder = null;
-				
-			this.width = endX - this.startX;
-			this.height = endY - this.startY;
 
-			int origin = calculateOrigin(width, height);
+			int origin = calculateOrigin(startX, startY, endX, endY);
 				
 			// calculate the rectangle
+			boolean top = (origin & TOP_LEFT) > 0 || (origin & TOP_RIGHT) > 0;
+			boolean left = (origin & TOP_LEFT) > 0 || (origin & BOTTOM_LEFT) > 0;  
 			
-			switch (origin) {
-			case TOP_LEFT:
-				/*
-				topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
-				rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
-				bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
-				leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
-				*/
-				LOG.debug("origin top-left");
-				break;
-			case TOP_RIGHT:
-				/*
-				topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
-				rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
-				bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
-				leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
-				*/
-				LOG.debug("origin top-right");
-				break;
-			case BOTTOM_RIGHT:
-				/*
-				topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
-				rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
-				bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
-				leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
-				*/
-				LOG.debug("origin bottom-right");
-				break;
-			case BOTTOM_LEFT:
-				/*
-				topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
-				rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
-				bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
-				leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
-				*/
-				LOG.debug("origin bottom-left");
-				break;
-			}
-				
-			// create new region
 			/*
+			 * distinguish betwen top and bottom
+			 * left- and right border are calculated the same for top or bottom
+			 */
+			
+			int x1;
+			int x2;
+			int y1;
+			int y2;
+			
+			if (top) {
+				y1 = startY;
+				y2 = endY;
+			} else { // bottom
+				y1 = endY;
+				y2 = startY;
+			}
+			
+			if (left) {
+				x1 = startX;
+				x2 = endX;
+			} else { // right
+				x1 = endX;
+				x2 = startX;
+			}
+			
+			int width = x2 - x1;
+			int height = y2 - y1;
+				
+			topBorder = new Rectangle(x1 - borderWidth, y1 - borderWidth, width, borderWidth);
+			rightBorder = new Rectangle(x2 - borderWidth, y1 - borderWidth, borderWidth, height);
+			bottomBorder = new Rectangle(x1, y2-borderWidth, width, borderWidth);
+			leftBorder = new Rectangle(x1 - borderWidth, y1, borderWidth, height);
+
+			// create new region
 			try {
 				region = new Region();
 				region.add(topBorder);
@@ -171,15 +169,14 @@ public class JShot {
 				shell.layout();
 			} catch (IllegalArgumentException e) {
 				LOG.debug("###################################");
-				LOG.debug("Start Point: x[{}], y[{}]", this.startX, this.startY);
-				LOG.debug("End Point: x[{}], y[{}]", endX, endY);
+				LOG.debug("Point1: x1[{}], y1[{}]", x1, y1);
+				LOG.debug("Point2: x2[{}], y2[{}]", x2, y2);
 				LOG.debug("topBorder: [{}]", topBorder);
 				LOG.debug("rightBorder: [{}]", rightBorder);
 				LOG.debug("bottomBorder: [{}]", bottomBorder);
 				LOG.debug("leftBorder: [{}]", leftBorder);
 				LOG.debug("###################################");
 			}
-			*/
 		}
 		
 		public Rectangle getBounds() {
@@ -190,12 +187,12 @@ public class JShot {
 	
 	public static final int TOP_LEFT = 0x01;
 	public static final int TOP_RIGHT = 0x02;
-	public static final int BOTTOM_RIGHT = 0x03;
-	public static final int BOTTOM_LEFT = 0x04;
+	public static final int BOTTOM_RIGHT = 0x04;
+	public static final int BOTTOM_LEFT = 0x08;
 	
-	public static int calculateOrigin(int startX, int startY, int endX, int endY) {
-		int width = endX - startX;
-		int height = endY - startY;
+	public static int calculateOrigin(int x1, int y1, int x2, int y2) {
+		int width = x2 - x1;
+		int height = y2 - y1;
 		return calculateOrigin(width, height);
 	}
 
@@ -203,12 +200,12 @@ public class JShot {
 		
 		if (width > 0 && height > 0) {
 			return TOP_LEFT;
-		} else if (width > 0 && height < 0) {
-			return BOTTOM_LEFT;
 		} else if (width < 0 && height > 0) {
 			return TOP_RIGHT;
-		} else {
+		} else if (width < 0 && height < 0) {
 			return BOTTOM_RIGHT;
+		} else {
+			return BOTTOM_LEFT;
 		}
 		
 	
@@ -277,7 +274,7 @@ public class JShot {
 		public void keyReleased(KeyEvent e) {
 			switch (e.keyCode) {
 			case SWT.ESC: 
-				motherShell.dispose();
+				frame.clear();
 				break;
 			case KEY_ENTER:
 				System.out.println("taking screenshot from region: " + frame.getBounds());
