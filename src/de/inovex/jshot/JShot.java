@@ -2,14 +2,22 @@ package de.inovex.jshot;
 
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
@@ -33,18 +41,28 @@ public class JShot {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(JShot.class);
 	
+	private String imageFilepath;
+	
 	public static void main(String [] args) {
-		new JShot();
+		String filename;
+		if (args.length > 0) {
+			filename = args[0];
+		} else {
+			filename = "screenshot.png";
+		}
+		new JShot(filename);
+		System.out.println(filename);
 	}
 	
-	public JShot() {
+	public JShot(String imageFilepath) {
+		this.imageFilepath = imageFilepath;
 		
 		transparentShell = new Shell(SWT.NONE);
 		transparentShell.setAlpha(0);
 		display = transparentShell.getDisplay();
 		transparentShell.setSize(display.getBounds().width, display.getBounds().height);
 
-		MyListener myListener = new MyListener(transparentShell);
+		MyListener myListener = new MyListener(this);
 		transparentShell.addMouseListener(myListener);
 		transparentShell.addMouseMoveListener(myListener);
 		transparentShell.addKeyListener(myListener);
@@ -94,7 +112,6 @@ public class JShot {
 		}
 		
 		public Frame(Shell parent, int borderWidth, Color borderColor) {
-			
 			// create shell that is used for painting the frame
 			shell = new Shell(parent, SWT.NO_TRIM);
 			this.borderWidth = borderWidth;
@@ -183,9 +200,8 @@ public class JShot {
 		}
 		
 		public Rectangle getBounds() {
-			return new Rectangle(x1, y1, x2-x1, y2-y1);
+			return new Rectangle(x1, y1, x2-x1- borderWidth, y2-y1 -borderWidth);
 		}
-		
 	}
 	
 	public static final int TOP_LEFT = 0x01;
@@ -210,8 +226,27 @@ public class JShot {
 		} else {
 			return BOTTOM_LEFT;
 		}
-		
+	}
 	
+	public void shot(Rectangle rectangle) {
+		GC gc = new GC(display);
+		final Image image = new Image(display, rectangle);
+		gc.copyArea(image, rectangle.x, rectangle.y);
+		gc.dispose();
+		
+		ScrolledComposite sc = new ScrolledComposite (transparentShell, SWT.V_SCROLL | SWT.H_SCROLL);
+		Canvas canvas = new Canvas(sc, SWT.NONE);
+		sc.setContent(canvas);
+		canvas.setBounds(display.getBounds ());
+		canvas.addPaintListener(new PaintListener() {
+			public void paintControl(PaintEvent e) {
+				e.gc.drawImage(image, 0, 0);
+			}
+		});
+
+		ImageLoader imageLoader = new ImageLoader();
+		imageLoader.data = new ImageData[]{image.getImageData()};
+		imageLoader.save(imageFilepath, SWT.IMAGE_PNG);
 	}
 		
 	
@@ -220,10 +255,12 @@ public class JShot {
 		private Shell parentShell;
 		private Frame frame;
 		private boolean draw = false;
+		private JShot jshot;
 		
 		
-		public MyListener(Shell parentShell) {
-			this.parentShell = parentShell;
+		public MyListener(JShot jshot) {
+			this.jshot = jshot;
+			this.parentShell = jshot.transparentShell;
 			this.frame = new Frame(parentShell);
 		}
 		
@@ -252,7 +289,6 @@ public class JShot {
 			} else {
 				//LOG.debug("Not drawing. x[{}] y[{}]", e.x, e.y);
 			}
-			
 		}
 
 		@Override
@@ -265,14 +301,15 @@ public class JShot {
 		public void keyReleased(KeyEvent e) {
 			switch (e.keyCode) {
 			case SWT.ESC: 
-				frame.clear();
+				parentShell.dispose();
+				//frame.clear();
 				break;
 			case KEY_ENTER:
-				System.out.println("taking screenshot from region: " + frame.getBounds());
+				//System.out.println("taking screenshot from region: " + frame.getBounds());
+				this.jshot.shot(frame.getBounds());
 				parentShell.dispose();
 				break;
 			}
 		}
-		
 	}
 }
