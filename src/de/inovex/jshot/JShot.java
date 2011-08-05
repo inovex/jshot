@@ -76,8 +76,11 @@ public class JShot {
 		private Shell shell;
 		private int startX;
 		private int startY;
-		private int width;
-		private int height;
+		
+		private int x1;
+		private int y1;
+		private int x2;
+		private int y2;
 
 		public void clear() {
 			if (region != null) {
@@ -129,12 +132,8 @@ public class JShot {
 			 * left- and right border are calculated the same for top or bottom
 			 */
 			
-			int x1;
-			int x2;
-			int y1;
-			int y2;
-			int borderX;
-			int borderY;
+			int borderX = 0;
+			int borderY = 0;
 			
 			if (top) {
 				y1 = startY;
@@ -143,7 +142,6 @@ public class JShot {
 			} else { // bottom
 				y1 = endY;
 				y2 = startY;
-				borderY = -borderWidth;
 			}
 			
 			if (left) {
@@ -153,7 +151,6 @@ public class JShot {
 			} else { // right
 				x1 = endX;
 				x2 = startX;
-				borderX = -borderWidth;
 			}
 			
 			int width = x2 - x1 + borderWidth;
@@ -186,7 +183,7 @@ public class JShot {
 		}
 		
 		public Rectangle getBounds() {
-			return new Rectangle(startX, startY, width, height);
+			return new Rectangle(x1, y1, x2-x1, y2-y1);
 		}
 		
 	}
@@ -218,33 +215,21 @@ public class JShot {
 	}
 		
 	
-	public static class FrameBorders {
-		
-		// calculate the rectangle
-		/*
-		Rectangle topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
-		Rectangle rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
-		Rectangle bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
-		Rectangle leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
-		*/
-		
-	}
-	
 	public static class MyListener implements MouseMoveListener, MouseListener,KeyListener {
 
-		private Shell motherShell;
+		private Shell parentShell;
 		private Frame frame;
 		private boolean draw = false;
 		
 		
-		public MyListener(Shell motherShell) {
-			this.motherShell = motherShell;
-			this.frame = new Frame(motherShell);
+		public MyListener(Shell parentShell) {
+			this.parentShell = parentShell;
+			this.frame = new Frame(parentShell);
 		}
 		
 		@Override
 		public void mouseDoubleClick(MouseEvent e) {
-			// TODO Auto-generated method stub
+			// unused
 			
 		}
 
@@ -272,7 +257,7 @@ public class JShot {
 
 		@Override
 		public void keyPressed(KeyEvent e) {
-			// TODO Auto-generated method stub
+			// unused
 			
 		}
 
@@ -284,7 +269,7 @@ public class JShot {
 				break;
 			case KEY_ENTER:
 				System.out.println("taking screenshot from region: " + frame.getBounds());
-				motherShell.dispose();
+				parentShell.dispose();
 				break;
 			}
 		}
