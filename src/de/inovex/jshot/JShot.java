@@ -12,13 +12,26 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * TODO
+ * - inverse frame painting, starting at the top-right,bottom-right and bottom-left corner
+ * - screen shot the framed region
+ * - actions dialog (save, send, start program, open inkscape)
+ * - 
+ * @author ruben
+ *
+ */
 public class JShot {
 	
 	public static final int KEY_ENTER = 0x0d;
 	
 	private Display display;
 	private Shell transparentShell;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(JShot.class);
 	
 	public static void main(String [] args) {
 		new JShot();
@@ -93,29 +106,125 @@ public class JShot {
 			if (region != null) {
 				region.dispose();
 			}
+
+			
+			Rectangle topBorder = null;
+			Rectangle rightBorder = null;
+			Rectangle bottomBorder = null;
+			Rectangle leftBorder = null;
+				
 			this.width = endX - this.startX;
 			this.height = endY - this.startY;
 
+			int origin = calculateOrigin(width, height);
+				
 			// calculate the rectangle
-			Rectangle topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width + borderWidth, borderWidth);
-			Rectangle bottomBorder = new Rectangle(this.startX - borderWidth, endY-borderWidth, width, borderWidth);
-
-			Rectangle leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
-			Rectangle rightBorder = new Rectangle(endX - borderWidth, this.startY, borderWidth, height);
 			
+			switch (origin) {
+			case TOP_LEFT:
+				/*
+				topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
+				rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
+				bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
+				leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
+				*/
+				LOG.debug("origin top-left");
+				break;
+			case TOP_RIGHT:
+				/*
+				topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
+				rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
+				bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
+				leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
+				*/
+				LOG.debug("origin top-right");
+				break;
+			case BOTTOM_RIGHT:
+				/*
+				topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
+				rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
+				bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
+				leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
+				*/
+				LOG.debug("origin bottom-right");
+				break;
+			case BOTTOM_LEFT:
+				/*
+				topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
+				rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
+				bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
+				leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
+				*/
+				LOG.debug("origin bottom-left");
+				break;
+			}
+				
 			// create new region
-			region = new Region();
-			region.add(topBorder);
-			region.add(leftBorder);
-			region.add(rightBorder);
-			region.add(bottomBorder);
-			shell.setRegion(region);
-			shell.layout();
+			/*
+			try {
+				region = new Region();
+				region.add(topBorder);
+				region.add(leftBorder);
+				region.add(rightBorder);
+				region.add(bottomBorder);
+				shell.setRegion(region);
+				shell.layout();
+			} catch (IllegalArgumentException e) {
+				LOG.debug("###################################");
+				LOG.debug("Start Point: x[{}], y[{}]", this.startX, this.startY);
+				LOG.debug("End Point: x[{}], y[{}]", endX, endY);
+				LOG.debug("topBorder: [{}]", topBorder);
+				LOG.debug("rightBorder: [{}]", rightBorder);
+				LOG.debug("bottomBorder: [{}]", bottomBorder);
+				LOG.debug("leftBorder: [{}]", leftBorder);
+				LOG.debug("###################################");
+			}
+			*/
 		}
 		
 		public Rectangle getBounds() {
 			return new Rectangle(startX, startY, width, height);
 		}
+		
+	}
+	
+	public static final int TOP_LEFT = 0x01;
+	public static final int TOP_RIGHT = 0x02;
+	public static final int BOTTOM_RIGHT = 0x03;
+	public static final int BOTTOM_LEFT = 0x04;
+	
+	public static int calculateOrigin(int startX, int startY, int endX, int endY) {
+		int width = endX - startX;
+		int height = endY - startY;
+		return calculateOrigin(width, height);
+	}
+
+	public static int calculateOrigin(int width, int height) {
+		
+		if (width > 0 && height > 0) {
+			return TOP_LEFT;
+		} else if (width > 0 && height < 0) {
+			return BOTTOM_LEFT;
+		} else if (width < 0 && height > 0) {
+			return TOP_RIGHT;
+		} else {
+			return BOTTOM_RIGHT;
+		}
+		
+	
+	}
+		
+	
+	public static class FrameBorders {
+		
+		// calculate the rectangle
+		/*
+		Rectangle topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width, borderWidth);
+		Rectangle rightBorder = new Rectangle(endX - borderWidth, this.startY - borderWidth, borderWidth, height);
+		Rectangle bottomBorder = new Rectangle(this.startX, endY-borderWidth, width, borderWidth);
+		Rectangle leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
+		*/
+		
 	}
 	
 	public static class MyListener implements MouseMoveListener, MouseListener,KeyListener {
@@ -153,7 +262,7 @@ public class JShot {
 			if (draw) {
 				this.frame.draw(e.x, e.y);
 			} else {
-				System.out.println("Not drawing. " + e.x + " " + e.y);
+				//LOG.debug("Not drawing. x[{}] y[{}]", e.x, e.y);
 			}
 			
 		}
