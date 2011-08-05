@@ -88,21 +88,22 @@ public class JShot {
 		}
 		
 		public void draw(int endX, int endY) {
-			// dispose previous region
-			this.width = endX - this.startX;
-			this.height = endY - this.startY;
 
+			// dispose previous region
 			if (region != null) {
 				region.dispose();
 			}
-			// create new region
-			
-			Rectangle topBorder = new Rectangle(this.startX, this.startY, width, borderWidth);
-			Rectangle bottomBorder = new Rectangle(this.startX, endY, width, borderWidth);
+			this.width = endX - this.startX;
+			this.height = endY - this.startY;
 
-			Rectangle leftBorder = new Rectangle(this.startX, this.startY, borderWidth, height);
+			// calculate the rectangle
+			Rectangle topBorder = new Rectangle(this.startX - borderWidth, this.startY - borderWidth, width + borderWidth, borderWidth);
+			Rectangle bottomBorder = new Rectangle(this.startX - borderWidth, endY-borderWidth, width, borderWidth);
+
+			Rectangle leftBorder = new Rectangle(this.startX - borderWidth, this.startY, borderWidth, height);
 			Rectangle rightBorder = new Rectangle(endX - borderWidth, this.startY, borderWidth, height);
 			
+			// create new region
 			region = new Region();
 			region.add(topBorder);
 			region.add(leftBorder);
