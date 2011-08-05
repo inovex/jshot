@@ -3,11 +3,6 @@ package de.inovex.jshot;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
@@ -24,12 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO
- * - inverse frame painting, starting at the top-right,bottom-right and bottom-left corner
- * - screen shot the framed region
- * - actions dialog (save, send, start program, open inkscape)
- * - 
- * @author ruben
+ * 
+ * @author ruben.jenster@inovex.de
  *
  */
 public class JShot {
@@ -62,7 +53,7 @@ public class JShot {
 		display = transparentShell.getDisplay();
 		transparentShell.setSize(display.getBounds().width, display.getBounds().height);
 
-		MyListener myListener = new MyListener(this);
+		JShotListener myListener = new JShotListener(this);
 		transparentShell.addMouseListener(myListener);
 		transparentShell.addMouseMoveListener(myListener);
 		transparentShell.addKeyListener(myListener);
@@ -200,7 +191,7 @@ public class JShot {
 		}
 		
 		public Rectangle getBounds() {
-			return new Rectangle(x1, y1, x2-x1- borderWidth, y2-y1 -borderWidth);
+			return new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth);
 		}
 	}
 	
@@ -248,68 +239,12 @@ public class JShot {
 		imageLoader.data = new ImageData[]{image.getImageData()};
 		imageLoader.save(imageFilepath, SWT.IMAGE_PNG);
 	}
-		
 	
-	public static class MyListener implements MouseMoveListener, MouseListener,KeyListener {
-
-		private Shell parentShell;
-		private Frame frame;
-		private boolean draw = false;
-		private JShot jshot;
-		
-		
-		public MyListener(JShot jshot) {
-			this.jshot = jshot;
-			this.parentShell = jshot.transparentShell;
-			this.frame = new Frame(parentShell);
-		}
-		
-		@Override
-		public void mouseDoubleClick(MouseEvent e) {
-			// unused
-			
-		}
-
-		@Override
-		public void mouseDown(MouseEvent e) {
-			// check if click was in the frame
-			this.frame.setStart(e.x, e.y);
-			this.draw = true;
-		}
-
-		@Override
-		public void mouseUp(MouseEvent e) {
-			this.draw = false;
-		}
-
-		@Override
-		public void mouseMove(MouseEvent e) {
-			if (draw) {
-				this.frame.draw(e.x, e.y);
-			} else {
-				//LOG.debug("Not drawing. x[{}] y[{}]", e.x, e.y);
-			}
-		}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-			// unused
-			
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			switch (e.keyCode) {
-			case SWT.ESC: 
-				parentShell.dispose();
-				//frame.clear();
-				break;
-			case KEY_ENTER:
-				//System.out.println("taking screenshot from region: " + frame.getBounds());
-				this.jshot.shot(frame.getBounds());
-				parentShell.dispose();
-				break;
-			}
-		}
+	public void quit() {
+		transparentShell.dispose();
+	};
+	
+	public Shell getShell() {
+		return transparentShell;
 	}
 }
