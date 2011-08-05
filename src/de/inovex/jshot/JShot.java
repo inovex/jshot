@@ -15,8 +15,6 @@ import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -29,8 +27,6 @@ public class JShot {
 	
 	private Display display;
 	private Shell transparentShell;
-	
-	private static final Logger LOG = LoggerFactory.getLogger(JShot.class);
 	
 	private String imageFilepath;
 	
@@ -179,19 +175,27 @@ public class JShot {
 				shell.setRegion(region);
 				shell.layout();
 			} catch (IllegalArgumentException e) {
-				LOG.debug("###################################");
-				LOG.debug("Point1: x1[{}], y1[{}]", x1, y1);
-				LOG.debug("Point2: x2[{}], y2[{}]", x2, y2);
-				LOG.debug("topBorder: [{}]", topBorder);
-				LOG.debug("rightBorder: [{}]", rightBorder);
-				LOG.debug("bottomBorder: [{}]", bottomBorder);
-				LOG.debug("leftBorder: [{}]", leftBorder);
-				LOG.debug("###################################");
+				debug("###################################");
+				debug("Point1: x1[%s], y1[%s]", x1, y1);
+				debug("Point2: x2[%s], y2[%s]", x2, y2);
+				debug("topBorder: [%s]", topBorder);
+				debug("rightBorder: [%s]", rightBorder);
+				debug("bottomBorder: [%s]", bottomBorder);
+				debug("leftBorder: [%s]", leftBorder);
+				debug("###################################");
 			}
 		}
 		
 		public Rectangle getBounds() {
 			return new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth);
+		}
+	}
+	
+	public static void debug(String format, Object ... params) {
+		if (params.length == 0) {
+			System.out.println(format);
+		} else {
+			System.out.println(String.format(format, params));
 		}
 	}
 	
