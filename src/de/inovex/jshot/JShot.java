@@ -29,8 +29,12 @@ public class JShot {
 	private Shell transparentShell;
 	
 	private String imageFilepath;
+	private static boolean DEBUG;
 	
 	public static void main(String [] args) {
+		
+		DEBUG = Boolean.valueOf(System.getProperty("debug"));
+
 		String filename;
 		if (args.length > 0) {
 			filename = args[0];
@@ -42,7 +46,9 @@ public class JShot {
 	}
 	
 	public JShot(String imageFilepath) {
+		
 		this.imageFilepath = imageFilepath;
+		
 		
 		transparentShell = new Shell(SWT.NONE);
 		transparentShell.setAlpha(0);
@@ -174,15 +180,20 @@ public class JShot {
 				region.add(bottomBorder);
 				shell.setRegion(region);
 				shell.layout();
-			} catch (IllegalArgumentException e) {
+			
 				debug("###################################");
-				debug("Point1: x1[%s], y1[%s]", x1, y1);
-				debug("Point2: x2[%s], y2[%s]", x2, y2);
+				debug("Point1: x1[%s], y1[%s]", startX, startY);
+				debug("Point2: x1[%s], y1[%s]", endX, endY);
+				debug("Point1c switched: x1[%s], y1[%s]", x1, y1);
+				debug("Point2c switched: x2[%s], y2[%s]", x2, y2);
 				debug("topBorder: [%s]", topBorder);
 				debug("rightBorder: [%s]", rightBorder);
 				debug("bottomBorder: [%s]", bottomBorder);
 				debug("leftBorder: [%s]", leftBorder);
 				debug("###################################");
+
+			} catch (IllegalArgumentException e) {
+				// ignore
 			}
 		}
 		
@@ -192,10 +203,12 @@ public class JShot {
 	}
 	
 	public static void debug(String format, Object ... params) {
-		if (params.length == 0) {
-			System.out.println(format);
-		} else {
-			System.out.println(String.format(format, params));
+		if (DEBUG) {
+			if (params.length == 0) {
+				System.out.println(format);
+			} else {
+				System.out.println(String.format(format, params));
+			}
 		}
 	}
 	
