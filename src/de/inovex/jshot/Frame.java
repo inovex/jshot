@@ -21,6 +21,10 @@ public class Frame {
 	private int y2;
 	private boolean top;
 	private boolean left;
+	private int moveY;
+	private int moveX;
+	private int endX;
+	private int endY;
 
 	public void clear() {
 		if (region != null) {
@@ -48,7 +52,26 @@ public class Frame {
 		this.startY = y;
 	}
 	
+	public synchronized void setStartMove(int x, int y) {
+		this.moveX = x;
+		this.moveY = y;
+	}
+	
+	public void move(int endX, int endY) {
+		int diffX = endX - moveX;
+		int diffY = endY - moveY;
+		
+		this.startX += diffX;
+		this.startY += diffY;
+		
+		draw(this.endX + diffX, this.endY + diffY);
+		
+	}
+	
 	public synchronized void draw(int endX, int endY) {
+		
+		this.endX = endX;
+		this.endY = endY;
 
 		// dispose previous region
 		if (region != null) {
@@ -144,5 +167,12 @@ public class Frame {
 			// BOTTOM_RIGHT, left and top border
 			return new Rectangle(x1+borderWidth, y1+borderWidth, x2-x1-borderWidth, y2-y1-borderWidth);
 		}
+	}
+	
+	public synchronized boolean inFrame(int x, int y) {
+		if (region != null && region.contains(x,y)) {
+			return true;
+		}
+		return false;
 	}
 }

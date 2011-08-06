@@ -18,6 +18,7 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 	private Frame frame;
 	private boolean draw = false;
 	private JShot jshot;
+	private boolean move;
 	
 	
 	public JShotListener(JShot jshot) {
@@ -31,23 +32,32 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 		
 	}
 
+	
+	
 	@Override
 	public void mouseDown(MouseEvent e) {
-		// check if click was in the frame
-		this.frame.setStart(e.x, e.y);
-		this.draw = true;
+		if (this.frame.inFrame(e.x, e.y)) {
+			this.frame.setStartMove(e.x, e.y);
+			this.move = true;
+		} else {
+			// check if click was in the frame
+			this.frame.setStart(e.x, e.y);
+			this.draw = true;
+		}
 	}
 
 	@Override
 	public void mouseUp(MouseEvent e) {
 		this.draw = false;
+		this.move = false;
 	}
 
 	@Override
 	public void mouseMove(MouseEvent e) {
 		if (draw) {
 			this.frame.draw(e.x, e.y);
-		} else {
+		} else if (move){
+			this.frame.move(e.x, e.y);
 			//LOG.debug("Not drawing. x[{}] y[{}]", e.x, e.y);
 		}
 	}
