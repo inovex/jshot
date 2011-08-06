@@ -92,6 +92,8 @@ public class JShot {
 		private int y1;
 		private int x2;
 		private int y2;
+		private boolean top;
+		private boolean left;
 
 		public void clear() {
 			if (region != null) {
@@ -114,12 +116,12 @@ public class JShot {
 			shell.setVisible(true);
 		}
 		
-		public void setStart(int x, int y) {
+		public synchronized void setStart(int x, int y) {
 			this.startX = x;
 			this.startY = y;
 		}
 		
-		public void draw(int endX, int endY) {
+		public synchronized void draw(int endX, int endY) {
 
 			// dispose previous region
 			if (region != null) {
@@ -133,9 +135,8 @@ public class JShot {
 
 			int origin = calculateOrigin(startX, startY, endX, endY);
 				
-			// calculate the rectangle
-			boolean top = (origin & TOP_LEFT) > 0 || (origin & TOP_RIGHT) > 0;
-			boolean left = (origin & TOP_LEFT) > 0 || (origin & BOTTOM_LEFT) > 0;  
+			top = (origin & TOP_LEFT) > 0 || (origin & TOP_RIGHT) > 0;
+			left = (origin & TOP_LEFT) > 0 || (origin & BOTTOM_LEFT) > 0;  
 			
 			/*
 			 * distinguish between top and bottom
@@ -165,19 +166,25 @@ public class JShot {
 			
 			int width = x2 - x1 + borderWidth;
 			int height = y2 - y1 + borderWidth;
-				
+			
+			
+			/*
 			topBorder = new Rectangle(x1 - borderX, y1 - borderY, width, borderWidth);
 			rightBorder = new Rectangle(x2 - borderX, y1 - borderY, borderWidth, height);
 			bottomBorder = new Rectangle(x1 - borderX, y2 - borderY, width, borderWidth);
 			leftBorder = new Rectangle(x1 - borderX, y1 - borderY, borderWidth, height);
-
+			*/
 			// create new region
 			try {
 				region = new Region();
+				region.add(new Rectangle(x1-borderWidth, y1-borderWidth, x2-x1, y2-y1));
+				region.subtract(new Rectangle(x1, y1, x2-x1-2*borderWidth, y2-y1-2*borderWidth));
+				/*
 				region.add(topBorder);
 				region.add(leftBorder);
 				region.add(rightBorder);
 				region.add(bottomBorder);
+				*/
 				shell.setRegion(region);
 				shell.layout();
 			
@@ -197,8 +204,19 @@ public class JShot {
 			}
 		}
 		
-		public Rectangle getBounds() {
-			return new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth);
+		public synchronized Rectangle getBounds() {
+			if (top && left) {
+				return new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth);
+			} else if (top && !left) {
+				// TOP_RIGHT, left border
+				return new Rectangle(x1+borderWidth, y1, x2-x1-borderWidth, y2-y1-borderWidth);
+			} else if (!top && left) {
+				// BOTTOM_LEFT, top border
+				return new Rectangle(x1, y1+borderWidth, x2-x1-borderWidth, y2-y1-borderWidth);
+			} else {
+				// BOTTOM_RIGHT, left and top border
+				return new Rectangle(x1+borderWidth, y1+borderWidth, x2-x1-borderWidth, y2-y1-borderWidth);
+			}
 		}
 	}
 	
