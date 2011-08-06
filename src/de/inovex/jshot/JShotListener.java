@@ -7,7 +7,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 
-import de.inovex.jshot.JShot.Frame;
 
 /**
  * 
