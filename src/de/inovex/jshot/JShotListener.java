@@ -28,8 +28,7 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 	
 	@Override
 	public void mouseDoubleClick(MouseEvent e) {
-		// unused
-		
+		JShot.debug("double click");
 	}
 
 	

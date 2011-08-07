@@ -57,15 +57,23 @@ public class Frame {
 		this.moveY = y;
 	}
 	
-	public void move(int endX, int endY) {
-		int diffX = endX - moveX;
-		int diffY = endY - moveY;
+	public synchronized void move(int endMoveX, int endMoveY) {
+				
+		int diffMoveX = endMoveX - moveX;
+		int diffMoveY =  endMoveY - moveY;
 		
-		this.startX += diffX;
-		this.startY += diffY;
+		JShot.debug("Move Begin (x,y) = (%d,%d)", this.moveX, this.moveY);
+		JShot.debug("Move End (x,y) = (%d,%d)", endMoveX, endMoveY);
+		JShot.debug("Diff (x,y) = (%d,%d)", diffMoveX, diffMoveY);
 		
-		draw(this.endX + diffX, this.endY + diffY);
+		this.startX += diffMoveX;
+		this.startY += diffMoveY;
 		
+		// next move we have start at the last move end position
+		this.moveX = endMoveX;
+		this.moveY = endMoveY;
+		
+		draw(this.endX + diffMoveX, this.endY + diffMoveY);
 	}
 	
 	public synchronized void draw(int endX, int endY) {
@@ -78,11 +86,6 @@ public class Frame {
 			region.dispose();
 		}
 		
-		Rectangle topBorder = null;
-		Rectangle rightBorder = null;
-		Rectangle bottomBorder = null;
-		Rectangle leftBorder = null;
-
 		int origin = JShot.calculateOrigin(startX, startY, endX, endY);
 			
 		top = (origin & JShot.TOP_LEFT) > 0 || (origin & JShot.TOP_RIGHT) > 0;
@@ -93,13 +96,9 @@ public class Frame {
 		 * left- and right border are calculated the same for top or bottom
 		 */
 		
-		int borderX = 0;
-		int borderY = 0;
-		
 		if (top) {
 			y1 = startY;
 			y2 = endY;
-			borderY = borderWidth;
 		} else { // bottom
 			y1 = endY;
 			y2 = startY;
@@ -108,45 +107,23 @@ public class Frame {
 		if (left) {
 			x1 = startX;
 			x2 = endX;
-			borderX = borderWidth;
 		} else { // right
 			x1 = endX;
 			x2 = startX;
 		}
-		
-		int width = x2 - x1 + borderWidth;
-		int height = y2 - y1 + borderWidth;
-		
-		
-		/*
-		topBorder = new Rectangle(x1 - borderX, y1 - borderY, width, borderWidth);
-		rightBorder = new Rectangle(x2 - borderX, y1 - borderY, borderWidth, height);
-		bottomBorder = new Rectangle(x1 - borderX, y2 - borderY, width, borderWidth);
-		leftBorder = new Rectangle(x1 - borderX, y1 - borderY, borderWidth, height);
-		*/
 		// create new region
 		try {
 			region = new Region();
 			region.add(new Rectangle(x1-borderWidth, y1-borderWidth, x2-x1, y2-y1));
 			region.subtract(new Rectangle(x1, y1, x2-x1-2*borderWidth, y2-y1-2*borderWidth));
-			/*
-			region.add(topBorder);
-			region.add(leftBorder);
-			region.add(rightBorder);
-			region.add(bottomBorder);
-			*/
 			shell.setRegion(region);
 			shell.layout();
 		
 			JShot.debug("###################################");
-			JShot.debug("Point1: x1[%s], y1[%s]", startX, startY);
-			JShot.debug("Point2: x1[%s], y1[%s]", endX, endY);
-			JShot.debug("Point1c switched: x1[%s], y1[%s]", x1, y1);
-			JShot.debug("Point2c switched: x2[%s], y2[%s]", x2, y2);
-			JShot.debug("topBorder: [%s]", topBorder);
-			JShot.debug("rightBorder: [%s]", rightBorder);
-			JShot.debug("bottomBorder: [%s]", bottomBorder);
-			JShot.debug("leftBorder: [%s]", leftBorder);
+			JShot.debug("Point1: (x1,y1) = (%d,%d)", startX, startY);
+			JShot.debug("Point2: (x2,y2) = (%d,%d)", endX, endY);
+			JShot.debug("Point1c switched: (x1,y1) = (%d,%d)", x1, y1);
+			JShot.debug("Point2c switched: (x2,y2) = (%d,%d)", x2, y2);
 			JShot.debug("###################################");
 
 		} catch (IllegalArgumentException e) {
