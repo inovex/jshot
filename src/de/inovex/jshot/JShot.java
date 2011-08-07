@@ -88,30 +88,6 @@ public class JShot {
 		}
 	}
 	
-	public static final int TOP_LEFT = 0x01;
-	public static final int TOP_RIGHT = 0x02;
-	public static final int BOTTOM_RIGHT = 0x04;
-	public static final int BOTTOM_LEFT = 0x08;
-	
-	public static int calculateOrigin(int x1, int y1, int x2, int y2) {
-		int width = x2 - x1;
-		int height = y2 - y1;
-		return calculateOrigin(width, height);
-	}
-
-	public static int calculateOrigin(int width, int height) {
-		
-		if (width > 0 && height > 0) {
-			return TOP_LEFT;
-		} else if (width < 0 && height > 0) {
-			return TOP_RIGHT;
-		} else if (width < 0 && height < 0) {
-			return BOTTOM_RIGHT;
-		} else {
-			return BOTTOM_LEFT;
-		}
-	}
-	
 	public void shot(Rectangle rectangle) {
 		GC gc = new GC(display);
 		final Image image = new Image(display, rectangle);

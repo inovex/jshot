@@ -86,17 +86,14 @@ public class Frame {
 			region.dispose();
 		}
 		
-		int origin = JShot.calculateOrigin(startX, startY, endX, endY);
+		int origin = calculateOrigin(startX, startY, endX, endY);
 			
-		top = (origin & JShot.TOP_LEFT) > 0 || (origin & JShot.TOP_RIGHT) > 0;
-		left = (origin & JShot.TOP_LEFT) > 0 || (origin & JShot.BOTTOM_LEFT) > 0;  
-		
 		/*
 		 * distinguish between top and bottom
 		 * left- and right border are calculated the same for top or bottom
 		 */
 		
-		if (top) {
+		if ((origin & TOP) > 0) {
 			y1 = startY;
 			y2 = endY;
 		} else { // bottom
@@ -104,7 +101,7 @@ public class Frame {
 			y2 = startY;
 		}
 		
-		if (left) {
+		if ((origin & LEFT) > 0) {
 			x1 = startX;
 			x2 = endX;
 		} else { // right
@@ -150,5 +147,32 @@ public class Frame {
 			return true;
 		}
 		return false;
+	}
+	
+	public static final int NONE = 0x00;
+	
+	public static final int TOP = 0x01;
+	public static final int BOTTOM = 0x02;
+	public static final int LEFT = 0x04;
+	public static final int RIGHT = 0x08;
+	public static final int CORNER = 0x10;
+	
+	public static int calculateOrigin(int x1, int y1, int x2, int y2) {
+		int width = x2 - x1;
+		int height = y2 - y1;
+		return calculateOrigin(width, height);
+	}
+
+	public static int calculateOrigin(int width, int height) {
+		
+		if (width > 0 && height > 0) {
+			return TOP | LEFT;
+		} else if (width < 0 && height > 0) {
+			return TOP | RIGHT;
+		} else if (width < 0 && height < 0) {
+			return BOTTOM | RIGHT;
+		} else {
+			return BOTTOM | LEFT;
+		}
 	}
 }
