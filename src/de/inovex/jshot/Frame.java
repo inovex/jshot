@@ -119,12 +119,14 @@ public class Frame {
 			shell.setRegion(region);
 			shell.layout();
 		
+			/*
 			JShot.debug("###################################");
 			JShot.debug("Point1: (x1,y1) = (%d,%d)", startX, startY);
 			JShot.debug("Point2: (x2,y2) = (%d,%d)", endX, endY);
 			JShot.debug("Point1c switched: (x1,y1) = (%d,%d)", x1, y1);
 			JShot.debug("Point2c switched: (x2,y2) = (%d,%d)", x2, y2);
 			JShot.debug("###################################");
+			*/
 
 		} catch (IllegalArgumentException e) {
 			// ignore
@@ -135,13 +137,10 @@ public class Frame {
 		if (top && left) {
 			return new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth);
 		} else if (top && !left) {
-			// TOP_RIGHT, left border
 			return new Rectangle(x1+borderWidth, y1, x2-x1-borderWidth, y2-y1-borderWidth);
 		} else if (!top && left) {
-			// BOTTOM_LEFT, top border
 			return new Rectangle(x1, y1+borderWidth, x2-x1-borderWidth, y2-y1-borderWidth);
 		} else {
-			// BOTTOM_RIGHT, left and top border
 			return new Rectangle(x1+borderWidth, y1+borderWidth, x2-x1-borderWidth, y2-y1-borderWidth);
 		}
 	}

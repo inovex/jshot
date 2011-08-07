@@ -16,10 +16,14 @@ import org.eclipse.swt.events.MouseMoveListener;
 public class JShotListener implements MouseMoveListener, MouseListener,KeyListener {
 
 	private Frame frame;
-	private boolean draw = false;
 	private JShot jshot;
-	private boolean move;
 	
+	private static final int DISABLED = 0x01;
+	private static final int DRAW = 0x02;
+	private static final int MOVE = 0x04;
+	private static final int RESIZE = 0x08;
+	
+	private int state = DISABLED;
 	
 	public JShotListener(JShot jshot) {
 		this.jshot = jshot;
@@ -28,36 +32,49 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 	
 	@Override
 	public void mouseDoubleClick(MouseEvent e) {
-		JShot.debug("double click");
+		// toggle the resize flag
+		this.state ^= RESIZE;
 	}
 
-	
-	
 	@Override
 	public void mouseDown(MouseEvent e) {
+		
+		// clear all flags but the the resize flag
+		this.state &= RESIZE;
+		
 		if (this.frame.inFrame(e.x, e.y)) {
 			this.frame.setStartMove(e.x, e.y);
-			this.move = true;
+			this.state |= MOVE;
 		} else {
 			// check if click was in the frame
 			this.frame.setStart(e.x, e.y);
-			this.draw = true;
+			this.state |= DRAW;
 		}
 	}
 
 	@Override
 	public void mouseUp(MouseEvent e) {
-		this.draw = false;
-		this.move = false;
+		this.state |= DISABLED;
 	}
 
 	@Override
 	public void mouseMove(MouseEvent e) {
-		if (draw) {
+		
+		JShot.debug("Move Mouse. State: %d", this.state);
+		
+		switch(state) {
+		case DRAW:
 			this.frame.draw(e.x, e.y);
-		} else if (move){
+			break;
+		case MOVE:
 			this.frame.move(e.x, e.y);
-			//LOG.debug("Not drawing. x[{}] y[{}]", e.x, e.y);
+			break;
+		case DRAW | RESIZE: 
+			JShot.debug("Draw resize (x,y) = (%d,%d)", e.x, e.y);
+			break;
+		case MOVE | RESIZE:
+			JShot.debug("Move resize (x,y) = (%d,%d)", e.x, e.y);
+			break;
 		}
 	}
 
@@ -72,10 +89,8 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 		switch (e.keyCode) {
 		case SWT.ESC: 
 			jshot.quit();
-			//frame.clear();
 			break;
 		case JShot.KEY_ENTER:
-			//System.out.println("taking screenshot from region: " + frame.getBounds());
 			this.jshot.shot(frame.getBounds());
 			jshot.quit();
 			break;
