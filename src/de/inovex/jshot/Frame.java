@@ -19,12 +19,18 @@ public class Frame {
 	private int y1;
 	private int x2;
 	private int y2;
-	private boolean top;
-	private boolean left;
 	private int moveY;
 	private int moveX;
 	private int endX;
 	private int endY;
+	
+	public static final int NONE = 0x00;
+	public static final int TOP = 0x01;
+	public static final int BOTTOM = 0x02;
+	public static final int LEFT = 0x04;
+	public static final int RIGHT = 0x08;
+	public static final int CORNER = 0x10;
+	private int origin;
 
 	public void clear() {
 		if (region != null) {
@@ -86,7 +92,7 @@ public class Frame {
 			region.dispose();
 		}
 		
-		int origin = calculateOrigin(startX, startY, endX, endY);
+		origin = calculateOrigin(startX, startY, endX, endY);
 			
 		/*
 		 * distinguish between top and bottom
@@ -131,11 +137,11 @@ public class Frame {
 	}
 	
 	public synchronized Rectangle getBounds() {
-		if (top && left) {
+		if ((origin & (TOP | LEFT)) > 0)  {
 			return new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth);
-		} else if (top && !left) {
+		} else if ((origin & (TOP | RIGHT)) > 0) {
 			return new Rectangle(x1+borderWidth, y1, x2-x1-borderWidth, y2-y1-borderWidth);
-		} else if (!top && left) {
+		} else if ((origin & (BOTTOM | LEFT)) > 0) {
 			return new Rectangle(x1, y1+borderWidth, x2-x1-borderWidth, y2-y1-borderWidth);
 		} else {
 			return new Rectangle(x1+borderWidth, y1+borderWidth, x2-x1-borderWidth, y2-y1-borderWidth);
@@ -149,21 +155,13 @@ public class Frame {
 		return false;
 	}
 	
-	public static final int NONE = 0x00;
-	
-	public static final int TOP = 0x01;
-	public static final int BOTTOM = 0x02;
-	public static final int LEFT = 0x04;
-	public static final int RIGHT = 0x08;
-	public static final int CORNER = 0x10;
-	
-	public static int calculateOrigin(int x1, int y1, int x2, int y2) {
+	private int calculateOrigin(int x1, int y1, int x2, int y2) {
 		int width = x2 - x1;
 		int height = y2 - y1;
 		return calculateOrigin(width, height);
 	}
 
-	public static int calculateOrigin(int width, int height) {
+	private int calculateOrigin(int width, int height) {
 		
 		if (width > 0 && height > 0) {
 			return TOP | LEFT;
@@ -174,5 +172,62 @@ public class Frame {
 		} else {
 			return BOTTOM | LEFT;
 		}
+	}
+	
+	public synchronized int getFramePosition(int x, int y) {
+		if (getCorner(TOP | LEFT | CORNER).contains(x,y)) {
+			JShot.debug("TOP | LEFT | CORNER");
+			return TOP | LEFT | CORNER;
+		} else if (getCorner(TOP | RIGHT | CORNER).contains(x, y)) {
+			JShot.debug("TOP | RIGHT | CORNER");
+			return TOP | RIGHT | CORNER;
+		} else if (getCorner(BOTTOM | RIGHT | CORNER).contains(x, y)) {
+			JShot.debug("BOTTOM | RIGHT | CORNER");
+			return BOTTOM | RIGHT | CORNER;
+		} else if (getCorner(BOTTOM | LEFT | CORNER).contains(x, y)) {
+			JShot.debug("BOTTOM | LEFT | CORNER");
+			return BOTTOM | LEFT | CORNER;
+		} else if (getCorner(TOP).contains(x, y)) {
+			JShot.debug("TOP");
+			return TOP;
+		} else if (getCorner(BOTTOM).contains(x, y)) {
+			JShot.debug("BOTTOM");
+			return BOTTOM;
+		} else if (getCorner(LEFT).contains(x, y)) {
+			JShot.debug("LEFT");
+			return LEFT;
+		} else if (getCorner(RIGHT).contains(x, y)) {
+			JShot.debug("RIGHT");
+			return RIGHT;
+		}
+		return -1;
+	}
+	
+	
+	public synchronized Rectangle getCorner(int position) {
+		switch (position) {
+		case TOP | LEFT | CORNER:
+			return new Rectangle(startX, startY, borderWidth, borderWidth);
+		case TOP | RIGHT | CORNER:
+			return new Rectangle(endX - borderWidth, startY, borderWidth, borderWidth);
+		case BOTTOM | RIGHT | CORNER:
+			return new Rectangle(endX - borderWidth, endY-borderWidth, borderWidth, borderWidth);
+		case BOTTOM | LEFT  | CORNER:
+			return new Rectangle(startX - borderWidth, endY-borderWidth, borderWidth, borderWidth);
+		case TOP:
+			return new Rectangle(startX + borderWidth, startY +borderWidth, endX-borderWidth, borderWidth);
+		case RIGHT:
+			return new Rectangle(endX - borderWidth, startY + borderWidth, borderWidth, endY-borderWidth);
+		case BOTTOM:
+			return new Rectangle(startX + borderWidth, endY-borderWidth, endX-borderWidth, borderWidth);
+		case LEFT:
+			return new Rectangle(startX, startY + borderWidth, borderWidth, endY-borderWidth);
+		} 
+		return null;
+	}
+
+	public void resize(int x, int y) {
+		// TODO Auto-generated method stub
+		
 	}
 }

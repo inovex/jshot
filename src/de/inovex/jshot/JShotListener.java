@@ -33,7 +33,10 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 	@Override
 	public void mouseDoubleClick(MouseEvent e) {
 		// toggle the resize flag
-		this.state ^= RESIZE;
+		if (this.frame.inFrame(e.x, e.y)) {
+			this.state ^= RESIZE;
+			JShot.debug("Resize mode is: %b", (this.state & RESIZE )> 0);
+		}
 	}
 
 	@Override
@@ -43,9 +46,16 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 		this.state &= RESIZE;
 		
 		if (this.frame.inFrame(e.x, e.y)) {
-			this.frame.setStartMove(e.x, e.y);
-			this.state |= MOVE;
+			if ((this.state & RESIZE) > 0) {
+				JShot.debug("resize");
+				this.frame.getFramePosition(e.x, e.y);
+			} else {
+				JShot.debug("move");
+				this.state |= MOVE;
+				this.frame.setStartMove(e.x, e.y);
+			}
 		} else {
+			JShot.debug("draw");
 			// check if click was in the frame
 			this.frame.setStart(e.x, e.y);
 			this.state |= DRAW;
@@ -60,7 +70,7 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 	@Override
 	public void mouseMove(MouseEvent e) {
 		
-		JShot.debug("Move Mouse. State: %d", this.state);
+		//JShot.debug("Move Mouse. State: %d", this.state);
 		
 		switch(state) {
 		case DRAW:
@@ -69,11 +79,11 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 		case MOVE:
 			this.frame.move(e.x, e.y);
 			break;
-		case DRAW | RESIZE: 
-			JShot.debug("Draw resize (x,y) = (%d,%d)", e.x, e.y);
+		case DRAW | RESIZE:
+			this.frame.getFramePosition(e.x, e.y);
+			this.frame.resize(e.x, e.y);
 			break;
 		case MOVE | RESIZE:
-			JShot.debug("Move resize (x,y) = (%d,%d)", e.x, e.y);
 			break;
 		}
 	}
