@@ -6,6 +6,11 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.Shell;
 
+/**
+ * 
+ * @author ruben.jenster@inovex.de
+ *
+ */
 public class Frame {
 		
 	private Shell shell;
@@ -65,42 +70,39 @@ public class Frame {
 		this.startMoveY = y;
 	}
 	
+	
 	public synchronized void move(int endMoveX, int endMoveY) {
 		
 		JShot.debug("move");
 				
+		// determine the difference of the move event
 		int diffMoveX = endMoveX - startMoveX;
 		int diffMoveY =  endMoveY - startMoveY;
-		/*
-		JShot.debug("Move Begin (x,y) = (%d,%d)", this.moveX, this.moveY);
-		JShot.debug("Move End (x,y) = (%d,%d)", endMoveX, endMoveY);
-		JShot.debug("Diff (x,y) = (%d,%d)", diffMoveX, diffMoveY);
-		*/
+		
+		// add the differences to the frame start position
 		this.startX += diffMoveX;
 		this.startY += diffMoveY;
 		
-		// next move we have start at the last move end position
+		// draw the moved frame with the updated end position
+		draw(this.endX + diffMoveX, this.endY + diffMoveY);
+
+		// next move we have to start at the previous end move position
 		this.startMoveX = endMoveX;
 		this.startMoveY = endMoveY;
 		
-		draw(this.endX + diffMoveX, this.endY + diffMoveY);
 	}
 	
 	public synchronized void draw(int endX, int endY) {
 		
 		JShot.debug("draw");
-		
-		this.endX = endX;
-		this.endY = endY;
 
-		// dispose previous region
+		// dispose an existing previous region
 		if (region != null) {
 			region.dispose();
 		}
 		
-		// find the quadrant of the coordinate system that 
-		// is the origin. depending of the origin quadrant,
-		// we have to switch the coordinates.
+		// we have to shift the coordinates, according to
+		// the quadrant from which the frame draw originated 
 		int origin = calculateOrigin(startX, startY, endX, endY);
 			
 		int x1;
@@ -143,6 +145,10 @@ public class Frame {
 		} catch (IllegalArgumentException e) {
 			// ignore
 		}
+		
+		// next draw we have to start at the previous end position
+		this.endX = endX;
+		this.endY = endY;
 	}
 	
 	// TODO use region to get the bounds?

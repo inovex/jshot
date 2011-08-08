@@ -18,6 +18,7 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 	private Frame frame;
 	private JShot jshot;
 	
+	// constants for the DMR(draw, move, resize) state machine
 	private static final int DISABLED = 0x01;
 	private static final int DRAW = 0x02;
 	private static final int MOVE = 0x04;
