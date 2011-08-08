@@ -101,7 +101,7 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 			jshot.quit();
 			break;
 		case JShot.KEY_ENTER:
-			this.jshot.shot(frame.getBounds());
+			this.jshot.shot(frame.getSelectedArea());
 			jshot.quit();
 			break;
 		}

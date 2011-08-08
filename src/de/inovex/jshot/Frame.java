@@ -17,6 +17,9 @@ public class Frame {
 	
 	// the region representing the frame area
 	private Region region;
+	
+	// the rectangle representing the selected area
+	private Rectangle selectedArea;	
 
 	// the width of the frame border
 	private int borderWidth;
@@ -41,6 +44,7 @@ public class Frame {
 	public static final int LEFT = 0x04;
 	public static final int RIGHT = 0x08;
 	public static final int CORNER = 0x10;
+
 
 	public void clear() {
 		if (region != null) {
@@ -136,7 +140,8 @@ public class Frame {
 		try {
 			region = new Region();
 			region.add(new Rectangle(x1-borderWidth, y1-borderWidth, x2-x1+borderWidth, y2-y1+borderWidth));
-			region.subtract(new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth));
+			selectedArea = new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth);
+			region.subtract(selectedArea);
 			shell.setRegion(region);
 			shell.layout();
 		
@@ -158,9 +163,8 @@ public class Frame {
 		this.endY = endY;
 	}
 	
-	// TODO use region to get the bounds?
-	public synchronized Rectangle getBounds() {
-		return region.getBounds();
+	public synchronized Rectangle getSelectedArea() {
+		return selectedArea;
 	}
 	
 	public synchronized boolean inFrame(int x, int y) {
