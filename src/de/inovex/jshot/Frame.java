@@ -7,19 +7,26 @@ import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.Shell;
 
 public class Frame {
-	
-	private Region region;
-	private int borderWidth;
-	
+		
 	private Shell shell;
+	
+	// the region representing the frame area
+	private Region region;
+
+	// the width of the frame border
+	private int borderWidth;
+
+	// start and end position for normal frame drawing
 	private int startX;
 	private int startY;
-	
-	private int moveY;
-	private int moveX;
 	private int endX;
 	private int endY;
+
+	// start position for move action
+	private int startMoveY;
+	private int startMoveX;
 	
+	// constants used to detect position and orientation of clicks in the frame
 	public static final int NONE = 0x00;
 	public static final int TOP = 0x01;
 	public static final int BOTTOM = 0x02;
@@ -54,16 +61,16 @@ public class Frame {
 	}
 	
 	public synchronized void startMove(int x, int y) {
-		this.moveX = x;
-		this.moveY = y;
+		this.startMoveX = x;
+		this.startMoveY = y;
 	}
 	
 	public synchronized void move(int endMoveX, int endMoveY) {
 		
 		JShot.debug("move");
 				
-		int diffMoveX = endMoveX - moveX;
-		int diffMoveY =  endMoveY - moveY;
+		int diffMoveX = endMoveX - startMoveX;
+		int diffMoveY =  endMoveY - startMoveY;
 		/*
 		JShot.debug("Move Begin (x,y) = (%d,%d)", this.moveX, this.moveY);
 		JShot.debug("Move End (x,y) = (%d,%d)", endMoveX, endMoveY);
@@ -73,8 +80,8 @@ public class Frame {
 		this.startY += diffMoveY;
 		
 		// next move we have start at the last move end position
-		this.moveX = endMoveX;
-		this.moveY = endMoveY;
+		this.startMoveX = endMoveX;
+		this.startMoveY = endMoveY;
 		
 		draw(this.endX + diffMoveX, this.endY + diffMoveY);
 	}
@@ -169,8 +176,16 @@ public class Frame {
 		}
 	}
 	
+	/**
+	 * Returns the location of the given coordinates in the frame.
+	 * You have to check if the coordinates are in the frame
+	 * with {@link #inFrame(int, int)} before.
+	 * 
+	 * @param x
+	 * @param y
+	 * @return and integer value representing the position, or -1 if the position isn't valid
+	 */
 	public synchronized int getFramePosition(int x, int y) {
-		/*
 		if (getCorner(TOP | LEFT | CORNER).contains(x,y)) {
 			JShot.debug("TOP | LEFT | CORNER");
 			return TOP | LEFT | CORNER;
@@ -183,7 +198,7 @@ public class Frame {
 		} else if (getCorner(BOTTOM | LEFT | CORNER).contains(x, y)) {
 			JShot.debug("BOTTOM | LEFT | CORNER");
 			return BOTTOM | LEFT | CORNER;
-		} else */if (getCorner(TOP).contains(x, y)) {
+		} else if (getCorner(TOP).contains(x, y)) {
 			JShot.debug("TOP");
 			return TOP;
 		} else if (getCorner(BOTTOM).contains(x, y)) {
@@ -196,11 +211,17 @@ public class Frame {
 			JShot.debug("RIGHT");
 			return RIGHT;
 		}
-		JShot.debug("outside");
+		// should not happen 
 		return -1;
 	}
 	
+	/**
+	 * @param position
+	 * @return the Rectangle for the area of the frame identified by the given position
+	 */
 	public synchronized Rectangle getCorner(int position) {
+		
+		// calculate the coordinates for the inner square (x1,y1), (x2,y1), (x2,y2), (x1,y2)
 		Rectangle bounds = this.region.getBounds();
 		int x1 = bounds.x + borderWidth;
 		int x2 = bounds.x + bounds.width - borderWidth;
@@ -208,22 +229,19 @@ public class Frame {
 		int y1 = bounds.y + borderWidth;
 		int y2 = bounds.y + bounds.height - borderWidth;
 		
-		// the effective width of the borders, excluding the corners
-		int width = bounds.width - 2*borderWidth;
-		int height = bounds.height - 2*borderWidth;
+		// the widths of the inner square
+		int width = bounds.width - (2 * borderWidth);
+		int height = bounds.height - (2 * borderWidth);
 
 		switch (position) {
-		/*
 		case TOP | LEFT | CORNER:
-			return new Rectangle(x1, y1, borderWidth, borderWidth);
+			return new Rectangle(bounds.x, bounds.y, borderWidth, borderWidth);
 		case TOP | RIGHT | CORNER:
-			return new Rectangle(x2 - borderWidth, y1, borderWidth, borderWidth);
+			return new Rectangle(x2, bounds.y, borderWidth, borderWidth);
 		case BOTTOM | RIGHT | CORNER:
-			return new Rectangle(x2 - borderWidth, y2-borderWidth, borderWidth, borderWidth);
+			return new Rectangle(x2, y2, borderWidth, borderWidth);
 		case BOTTOM | LEFT  | CORNER:
-			return new Rectangle(x1 - borderWidth, y2-borderWidth, borderWidth, borderWidth);
-		*/
-		
+			return new Rectangle(bounds.x, y2, borderWidth, borderWidth);
 		case TOP:
 			return new Rectangle(x1, bounds.y, width, borderWidth);
 		case RIGHT:
