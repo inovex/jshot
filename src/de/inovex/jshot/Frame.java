@@ -117,8 +117,8 @@ public class Frame {
 		// create new region
 		try {
 			region = new Region();
-			region.add(new Rectangle(x1-borderWidth, y1-borderWidth, x2-x1, y2-y1));
-			region.subtract(new Rectangle(x1, y1, x2-x1-2*borderWidth, y2-y1-2*borderWidth));
+			region.add(new Rectangle(x1-borderWidth, y1-borderWidth, x2-x1+borderWidth, y2-y1+borderWidth));
+			region.subtract(new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth));
 			shell.setRegion(region);
 			shell.layout();
 		

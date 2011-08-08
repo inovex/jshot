@@ -80,10 +80,8 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 			this.frame.move(e.x, e.y);
 			break;
 		case DRAW | RESIZE:
-			this.frame.getFramePosition(e.x, e.y);
-			this.frame.resize(e.x, e.y);
-			break;
 		case MOVE | RESIZE:
+			this.frame.resize(e.x, e.y);
 			break;
 		}
 	}
