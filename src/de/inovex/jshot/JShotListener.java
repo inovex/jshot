@@ -41,24 +41,27 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 
 	@Override
 	public void mouseDown(MouseEvent e) {
-		
+
 		// clear all flags but the the resize flag
 		this.state &= RESIZE;
-		
-		if (this.frame.inFrame(e.x, e.y)) {
-			if ((this.state & RESIZE) > 0) {
-				JShot.debug("resize");
-				this.frame.getFramePosition(e.x, e.y);
-			} else {
-				JShot.debug("move");
-				this.state |= MOVE;
-				this.frame.setStartMove(e.x, e.y);
+
+		boolean inFrame = this.frame.inFrame(e.x, e.y);
+
+		if ((this.state & RESIZE) > 0) {
+			if (inFrame) {
+				this.frame.resize(e.x, e.y);				
 			}
 		} else {
-			JShot.debug("draw");
-			// check if click was in the frame
-			this.frame.setStart(e.x, e.y);
-			this.state |= DRAW;
+			if (inFrame) {
+				this.state |= MOVE;
+				this.frame.startMove(e.x, e.y);
+			} else {
+				JShot.debug("draw");
+				// check if click was in the frame
+				this.frame.start(e.x, e.y);
+				this.state |= DRAW;
+			}
+
 		}
 	}
 

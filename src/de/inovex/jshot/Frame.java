@@ -53,25 +53,27 @@ public class Frame {
 		shell.setVisible(true);
 	}
 	
-	public synchronized void setStart(int x, int y) {
+	public synchronized void start(int x, int y) {
 		this.startX = x;
 		this.startY = y;
 	}
 	
-	public synchronized void setStartMove(int x, int y) {
+	public synchronized void startMove(int x, int y) {
 		this.moveX = x;
 		this.moveY = y;
 	}
 	
 	public synchronized void move(int endMoveX, int endMoveY) {
+		
+		JShot.debug("move");
 				
 		int diffMoveX = endMoveX - moveX;
 		int diffMoveY =  endMoveY - moveY;
-		
+		/*
 		JShot.debug("Move Begin (x,y) = (%d,%d)", this.moveX, this.moveY);
 		JShot.debug("Move End (x,y) = (%d,%d)", endMoveX, endMoveY);
 		JShot.debug("Diff (x,y) = (%d,%d)", diffMoveX, diffMoveY);
-		
+		*/
 		this.startX += diffMoveX;
 		this.startY += diffMoveY;
 		
@@ -83,6 +85,8 @@ public class Frame {
 	}
 	
 	public synchronized void draw(int endX, int endY) {
+		
+		JShot.debug("draw");
 		
 		this.endX = endX;
 		this.endY = endY;
@@ -200,34 +204,35 @@ public class Frame {
 			JShot.debug("RIGHT");
 			return RIGHT;
 		}
+		JShot.debug("outside");
 		return -1;
 	}
-	
 	
 	public synchronized Rectangle getCorner(int position) {
 		switch (position) {
 		case TOP | LEFT | CORNER:
-			return new Rectangle(startX, startY, borderWidth, borderWidth);
+			return new Rectangle(x1, y1, borderWidth, borderWidth);
 		case TOP | RIGHT | CORNER:
-			return new Rectangle(endX - borderWidth, startY, borderWidth, borderWidth);
+			return new Rectangle(x2 - borderWidth, y1, borderWidth, borderWidth);
 		case BOTTOM | RIGHT | CORNER:
-			return new Rectangle(endX - borderWidth, endY-borderWidth, borderWidth, borderWidth);
+			return new Rectangle(x2 - borderWidth, y2-borderWidth, borderWidth, borderWidth);
 		case BOTTOM | LEFT  | CORNER:
-			return new Rectangle(startX - borderWidth, endY-borderWidth, borderWidth, borderWidth);
+			return new Rectangle(x1 - borderWidth, y2-borderWidth, borderWidth, borderWidth);
 		case TOP:
-			return new Rectangle(startX + borderWidth, startY +borderWidth, endX-borderWidth, borderWidth);
+			return new Rectangle(x1 + borderWidth, y1 +borderWidth, x2-borderWidth, borderWidth);
 		case RIGHT:
-			return new Rectangle(endX - borderWidth, startY + borderWidth, borderWidth, endY-borderWidth);
+			return new Rectangle(x2 - borderWidth, y1 + borderWidth, borderWidth, y2-borderWidth);
 		case BOTTOM:
-			return new Rectangle(startX + borderWidth, endY-borderWidth, endX-borderWidth, borderWidth);
+			return new Rectangle(x1 + borderWidth, y2-borderWidth, x2-borderWidth, borderWidth);
 		case LEFT:
-			return new Rectangle(startX, startY + borderWidth, borderWidth, endY-borderWidth);
+			return new Rectangle(x1, y1 + borderWidth, borderWidth, y2-borderWidth);
 		} 
 		return null;
 	}
 
 	public void resize(int x, int y) {
-		// TODO Auto-generated method stub
 		
+		JShot.debug("resize");
+		getFramePosition(x, y);
 	}
 }
