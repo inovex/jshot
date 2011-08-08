@@ -15,10 +15,6 @@ public class Frame {
 	private int startX;
 	private int startY;
 	
-	private int x1;
-	private int y1;
-	private int x2;
-	private int y2;
 	private int moveY;
 	private int moveX;
 	private int endX;
@@ -30,7 +26,6 @@ public class Frame {
 	public static final int LEFT = 0x04;
 	public static final int RIGHT = 0x08;
 	public static final int CORNER = 0x10;
-	private int origin;
 
 	public void clear() {
 		if (region != null) {
@@ -96,12 +91,15 @@ public class Frame {
 			region.dispose();
 		}
 		
-		origin = calculateOrigin(startX, startY, endX, endY);
+		// find the quadrant of the coordinate system that 
+		// is the origin. depending of the origin quadrant,
+		// we have to switch the coordinates.
+		int origin = calculateOrigin(startX, startY, endX, endY);
 			
-		/*
-		 * distinguish between top and bottom
-		 * left- and right border are calculated the same for top or bottom
-		 */
+		int x1;
+		int y1;
+		int x2;
+		int y2;
 		
 		if ((origin & TOP) > 0) {
 			y1 = startY;
@@ -140,16 +138,9 @@ public class Frame {
 		}
 	}
 	
+	// TODO use region to get the bounds?
 	public synchronized Rectangle getBounds() {
-		if ((origin & (TOP | LEFT)) > 0)  {
-			return new Rectangle(x1, y1, x2-x1-borderWidth, y2-y1-borderWidth);
-		} else if ((origin & (TOP | RIGHT)) > 0) {
-			return new Rectangle(x1+borderWidth, y1, x2-x1-borderWidth, y2-y1-borderWidth);
-		} else if ((origin & (BOTTOM | LEFT)) > 0) {
-			return new Rectangle(x1, y1+borderWidth, x2-x1-borderWidth, y2-y1-borderWidth);
-		} else {
-			return new Rectangle(x1+borderWidth, y1+borderWidth, x2-x1-borderWidth, y2-y1-borderWidth);
-		}
+		return region.getBounds();
 	}
 	
 	public synchronized boolean inFrame(int x, int y) {
@@ -179,6 +170,7 @@ public class Frame {
 	}
 	
 	public synchronized int getFramePosition(int x, int y) {
+		/*
 		if (getCorner(TOP | LEFT | CORNER).contains(x,y)) {
 			JShot.debug("TOP | LEFT | CORNER");
 			return TOP | LEFT | CORNER;
@@ -191,7 +183,7 @@ public class Frame {
 		} else if (getCorner(BOTTOM | LEFT | CORNER).contains(x, y)) {
 			JShot.debug("BOTTOM | LEFT | CORNER");
 			return BOTTOM | LEFT | CORNER;
-		} else if (getCorner(TOP).contains(x, y)) {
+		} else */if (getCorner(TOP).contains(x, y)) {
 			JShot.debug("TOP");
 			return TOP;
 		} else if (getCorner(BOTTOM).contains(x, y)) {
@@ -209,7 +201,19 @@ public class Frame {
 	}
 	
 	public synchronized Rectangle getCorner(int position) {
+		Rectangle bounds = this.region.getBounds();
+		int x1 = bounds.x + borderWidth;
+		int x2 = bounds.x + bounds.width - borderWidth;
+
+		int y1 = bounds.y + borderWidth;
+		int y2 = bounds.y + bounds.height - borderWidth;
+		
+		// the effective width of the borders, excluding the corners
+		int width = bounds.width - 2*borderWidth;
+		int height = bounds.height - 2*borderWidth;
+
 		switch (position) {
+		/*
 		case TOP | LEFT | CORNER:
 			return new Rectangle(x1, y1, borderWidth, borderWidth);
 		case TOP | RIGHT | CORNER:
@@ -218,14 +222,16 @@ public class Frame {
 			return new Rectangle(x2 - borderWidth, y2-borderWidth, borderWidth, borderWidth);
 		case BOTTOM | LEFT  | CORNER:
 			return new Rectangle(x1 - borderWidth, y2-borderWidth, borderWidth, borderWidth);
+		*/
+		
 		case TOP:
-			return new Rectangle(x1 + borderWidth, y1 +borderWidth, x2-borderWidth, borderWidth);
+			return new Rectangle(x1, bounds.y, width, borderWidth);
 		case RIGHT:
-			return new Rectangle(x2 - borderWidth, y1 + borderWidth, borderWidth, y2-borderWidth);
+			return new Rectangle(x2, y1, borderWidth, height);
 		case BOTTOM:
-			return new Rectangle(x1 + borderWidth, y2-borderWidth, x2-borderWidth, borderWidth);
+			return new Rectangle(x1, y2, width, borderWidth);
 		case LEFT:
-			return new Rectangle(x1, y1 + borderWidth, borderWidth, y2-borderWidth);
+			return new Rectangle(bounds.x, y1, borderWidth, height);
 		} 
 		return null;
 	}
