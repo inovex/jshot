@@ -31,6 +31,9 @@ public class Frame {
 	private int startMoveY;
 	private int startMoveX;
 	
+	// start position for resize
+	private int resizePosition;
+	
 	// constants used to detect position and orientation of clicks in the frame
 	public static final int NONE = 0x00;
 	public static final int TOP = 0x01;
@@ -90,6 +93,10 @@ public class Frame {
 		this.startMoveX = endMoveX;
 		this.startMoveY = endMoveY;
 		
+	}
+	
+	public synchronized void draw() {
+		this.draw(this.endX, this.endY);
 	}
 	
 	public synchronized void draw(int endX, int endY) {
@@ -263,6 +270,41 @@ public class Frame {
 	public void resize(int x, int y) {
 		
 		JShot.debug("resize");
-		getFramePosition(x, y);
+		
+		switch (resizePosition) {
+		case TOP | LEFT | CORNER:
+			this.startX = x;
+			this.startY = y;
+			break;
+		case TOP | RIGHT | CORNER:
+			this.endX = x;
+			this.startY = y;
+			break;
+		case BOTTOM | RIGHT | CORNER:
+			this.endX = x;
+			this.endY = y;
+			break;
+		case BOTTOM | LEFT  | CORNER:
+			this.startX = x;
+			this.endY = y;
+			break;
+		case TOP:
+			this.startY = y;
+			break;
+		case RIGHT:
+			this.endX = x;
+			break;
+		case BOTTOM:
+			this.endY = y;
+			break;
+		case LEFT:
+			this.startX = x;
+			break;
+		} 
+		draw();
+	}
+
+	public void setResizePosition(int x, int y) {
+		this.resizePosition = getFramePosition(x, y);
 	}
 }

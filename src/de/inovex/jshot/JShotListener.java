@@ -20,9 +20,10 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 	
 	// constants for the DMR(draw, move, resize) state machine
 	private static final int DISABLED = 0x01;
-	private static final int DRAW = 0x02;
-	private static final int MOVE = 0x04;
-	private static final int RESIZE = 0x08;
+	private static final int RESIZE_ON = 0x02;
+	private static final int DRAW = 0x04;
+	private static final int MOVE = 0x08;
+	private static final int RESIZE = 0x10;
 	
 	private int state = DISABLED;
 	
@@ -33,10 +34,10 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 	
 	@Override
 	public void mouseDoubleClick(MouseEvent e) {
-		// toggle the resize flag
+		// toggle the resize enabled flag
 		if (this.frame.inFrame(e.x, e.y)) {
-			this.state ^= RESIZE;
-			JShot.debug("Resize mode is: %b", (this.state & RESIZE )> 0);
+			this.state ^= RESIZE_ON;
+			JShot.debug("Resize mode is: %b", (this.state & RESIZE_ON )> 0);
 		}
 	}
 
@@ -44,25 +45,21 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 	public void mouseDown(MouseEvent e) {
 
 		// clear all flags but the the resize flag
-		this.state &= RESIZE;
+		this.state &= RESIZE_ON;
 
-		boolean inFrame = this.frame.inFrame(e.x, e.y);
-
-		if ((this.state & RESIZE) > 0) {
-			if (inFrame) {
-				this.frame.resize(e.x, e.y);				
+		if (this.frame.inFrame(e.x, e.y)) {
+			if ((this.state & RESIZE_ON) > 0) {
+				this.frame.setResizePosition(e.x, e.y);
+				this.state |= RESIZE;
+			} else {
+				this.state |= MOVE;
+				this.frame.startMove(e.x, e.y);				
 			}
 		} else {
-			if (inFrame) {
-				this.state |= MOVE;
-				this.frame.startMove(e.x, e.y);
-			} else {
-				JShot.debug("draw");
-				// check if click was in the frame
-				this.frame.start(e.x, e.y);
-				this.state |= DRAW;
-			}
-
+			JShot.debug("draw");
+			// check if click was in the frame
+			this.frame.start(e.x, e.y);
+			this.state |= DRAW;
 		}
 	}
 
@@ -78,13 +75,14 @@ public class JShotListener implements MouseMoveListener, MouseListener,KeyListen
 		
 		switch(state) {
 		case DRAW:
+		case DRAW | RESIZE_ON:
 			this.frame.draw(e.x, e.y);
 			break;
 		case MOVE:
+		case MOVE | RESIZE_ON:
 			this.frame.move(e.x, e.y);
 			break;
-		case DRAW | RESIZE:
-		case MOVE | RESIZE:
+		case RESIZE | RESIZE_ON:
 			this.frame.resize(e.x, e.y);
 			break;
 		}
