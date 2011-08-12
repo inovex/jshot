@@ -9,6 +9,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.Canvas;
@@ -24,8 +25,8 @@ public class JShot {
 	
 	public static final int KEY_ENTER = 0x0d;
 	
-	private Display display;
-	private Shell transparentShell;
+	private Display display = new Display();
+	private Shell startPoint;
 	
 	private String imageFilepath;
 	private static boolean DEBUG;
@@ -48,20 +49,19 @@ public class JShot {
 		
 		this.imageFilepath = imageFilepath;
 		
+		Point cursor = display.getCursorLocation();
 		
-		transparentShell = new Shell(SWT.NONE);
-		transparentShell.setAlpha(0);
-		display = transparentShell.getDisplay();
-		transparentShell.setSize(display.getBounds().width, display.getBounds().height);
+		startPoint = new Shell(SWT.NONE);
+		startPoint.setBounds(cursor.x, cursor.y, 50, 50);
 
 		JShotListener myListener = new JShotListener(this);
-		transparentShell.addMouseListener(myListener);
-		transparentShell.addMouseMoveListener(myListener);
-		transparentShell.addKeyListener(myListener);
+		startPoint.addMouseListener(myListener);
+		startPoint.addMouseMoveListener(myListener);
+		startPoint.addKeyListener(myListener);
 		
-		transparentShell.open();
+		startPoint.open();
 		
-		while (!transparentShell.isDisposed()) {
+		while (!startPoint.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
@@ -94,7 +94,7 @@ public class JShot {
 		gc.copyArea(image, rectangle.x, rectangle.y);
 		gc.dispose();
 		
-		ScrolledComposite sc = new ScrolledComposite (transparentShell, SWT.V_SCROLL | SWT.H_SCROLL);
+		ScrolledComposite sc = new ScrolledComposite (startPoint, SWT.V_SCROLL | SWT.H_SCROLL);
 		Canvas canvas = new Canvas(sc, SWT.NONE);
 		sc.setContent(canvas);
 		canvas.setBounds(display.getBounds ());
@@ -110,10 +110,10 @@ public class JShot {
 	}
 	
 	public void quit() {
-		transparentShell.dispose();
+		startPoint.dispose();
 	};
 	
 	public Shell getShell() {
-		return transparentShell;
+		return startPoint;
 	}
 }

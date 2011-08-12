@@ -1,5 +1,12 @@
 # JShot
 
+## TODO
+
+- use [launch4j](http://launch4j.sourceforge.net/) for packaging
+- integrate launch4j with buildr
+- or use [izpack](http://izpack.org/) for packaging
+
+
 ## Description
 
 A java (SWT) based screenshot program.
