@@ -246,7 +246,7 @@ public class Frame {
 		int y1 = bounds.y + borderWidth;
 		int y2 = bounds.y + bounds.height - borderWidth;
 		
-		// the widths of the inner square
+		// the sizes of the inner square
 		int width = bounds.width - (2 * borderWidth);
 		int height = bounds.height - (2 * borderWidth);
 
