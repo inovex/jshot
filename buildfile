@@ -1,4 +1,5 @@
 repositories.remote << 'http://www.ibiblio.org/maven2'
+repositories.remote << 'https://github.com/rjenster/mvn-repo/tree/master/releases'
 
 require 'time'
 
@@ -74,7 +75,7 @@ define 'jshot', :layout=>layout do
   swt_download(SWT_ARCH)
   
   # add the SWT development library to the compile time dependencies
-  compile.with(SWT_DEVELOP)
+  compile.with(SWT_DEVELOP, 'eu.jenster.helper:helper-swt:jar:0.1')
   
   
   # package the programm for different architectures
