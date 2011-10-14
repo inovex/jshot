@@ -1,0 +1,26 @@
+<launch4jConfig>
+  <headerType>console</headerType>
+  <outfile>file.exe</outfile>
+  <classPath>
+    <mainClass>de.inovex.jshot.JShot</mainClass>
+    <cp>./target/jshot-0.1-gtk-linux-x86.jar</cp>
+  </classPath>
+  <singleInstance>
+    <mutexName>jshot</mutexName>
+  </singleInstance>
+  <jre>
+    <!-- Specify one of the following or both -->
+    <minVersion>1.6.0</minVersion>
+  </jre>
+  <versionInfo>
+    <fileVersion>0.1</fileVersion>
+    <txtFileVersion>text</txtFileVersion>
+    <fileDescription>text</fileDescription>
+    <copyright>text</copyright>
+    <productVersion>0.1</productVersion>
+    <txtProductVersion>text</txtProductVersion>
+    <productName>jshot</productName>
+    <internalName>filename</internalName>
+    <originalFilename>filename.exe</originalFilename>
+  </versionInfo>
+</launch4jConfig>

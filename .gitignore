@@ -1,7 +1,9 @@
 bin
+arch
 .classpath
 .settings
 .project
 *~
 arch
 target
+.redcar
